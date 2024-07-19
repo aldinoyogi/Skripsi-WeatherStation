@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="./assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="./css/style-prod.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+    integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Tugas besar</title>
+</head>
+
+
+<body class="bg-slate-900">
+  <main class="min-h-screen min-w-screen flex justify-center items-center">
+
+    <div id="componentScreen"
+      class="max-w-7xl w-full m-auto flex justify-between items-center text-white flex-col h-screen p-12 md:p-24 space-y-12">
+      <div class="flex flex-col justify-center items-start w-full">
+        <p id="city" class="text-gray-400">Tugas Akhir</p>
+        <h1 class="font-bold text-3xl md:text-5xl">Weather Station</h1>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 w-full gap-12">
+        <div>
+          <canvas class="!w-full !h-full" id="chartTemperature"></canvas>
+        </div>
+        <div>
+          <canvas class="!w-full !h-full" id="chartPressure"></canvas>
+        </div>
+        <div>
+          <canvas class="!w-full !h-full" id="chartADCAirdrop"></canvas>
+        </div>
+        <div>
+          <canvas class="!w-full !h-full" id="chartHumidity"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+        <div class="flex justify-center items-start flex-col">
+          <div class="flex space-x-2 justify-center items-start text-gray-400">
+            <i class="fa-solid fa-droplet"></i>
+            <p class="text-sm md:text-md font-semibold">Humidity</p>
+          </div>
+          <p class="text-lg md:text-3xl font-bold" id="humidity">...</p>
+        </div>
+        <div class="flex justify-center items-start md:items-center flex-col">
+          <div class="flex space-x-2 justify-center items-start text-gray-400">
+            <i class="fa-solid fa-temperature-three-quarters"></i>
+            <p class="text-sm md:text-md font-semibold">Temperature</p>
+          </div>
+          <p class="text-lg md:text-3xl font-bold" id="temperature">...</p>
+        </div>
+        <div class="flex justify-center items-start md:items-center flex-col">
+          <div class="flex space-x-2 justify-center items-start text-gray-400">
+            <i class="fa-solid fa-wind"></i>
+            <p class="text-sm md:text-md font-semibold">ADC Rain Drop</p>
+          </div>
+          <p class="text-lg md:text-3xl font-bold" id="adcraindrop">...</p>
+        </div>
+        <div class="flex justify-center items-start md:items-center flex-col">
+          <div class="flex space-x-2 justify-center items-start text-gray-400">
+            <i class="fa-solid fa-up-down"></i>
+            <p class="text-sm md:text-md font-semibold">Pressure</p>
+          </div>
+          <p class="text-lg md:text-3xl font-bold" id="pressure">...</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    var host = window.location.host;
+    const ws = new WebSocket(`ws://${host}/ws`);
+
+    const createLineChart = (ctx, labels, title, dataset, borderColor) => {
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            // label: title,
+            data: dataset,
+            borderWidth: 2,
+            fill: false,
+            color: "white",
+            borderColor: borderColor,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: title,
+                color: "white",
+                font: {
+                  size: 12,
+                  weight: "bold"
+                }
+              },
+              ticks: {
+                color: "#9ca3af"
+              },
+              grid: {
+                color: "#374151",
+              }
+            },
+            y: {
+              ticks: {
+                color: "#9ca3af"
+              },
+              grid: {
+                color: "#374151",
+              }
+            }
+          },
+        }
+      });
+    }
+
+    ws.onmessage = function (event) {
+      const { type, data } = JSON.parse(event.data);
+      console.log(data);
+
+      if (type === 'realtime') {
+        const humidity = document.getElementById('humidity');
+        const temperature = document.getElementById('temperature');
+        const adcraindrop = document.getElementById('adcraindrop');
+        const pressure = document.getElementById('pressure');
+        const city = document.getElementById('city');
+        humidity.innerText = `${data.humidity}%`;
+        temperature.innerText = `${data.temperature}°C`;
+        adcraindrop.innerText = `${data.adc_raindrop} mm/h`;
+        pressure.innerText = `${data.pressure} hPa`;
+      }
+
+      if (type == "history_perminutes") {
+        const tempCtx = document.getElementById('chartTemperature').getContext('2d');
+        const pressureCtx = document.getElementById('chartPressure').getContext('2d');
+        const humidityCtx = document.getElementById('chartHumidity').getContext('2d');
+        const adcraindropCtx = document.getElementById('chartADCAirdrop').getContext('2d');
+
+        const labels = ['January', 'February', 'March', 'April', 'May'];
+        const datasets = [10, 25, 13, 18, 30];
+
+        createLineChart(tempCtx, labels, 'Temperature', datasets, "#f59e0b");
+        createLineChart(pressureCtx, labels, 'Pressure', datasets, "#84cc16");
+        createLineChart(humidityCtx, labels, 'Humidity', datasets, "#0284c7");
+        createLineChart(adcraindropCtx, labels, 'ADC Rain Drop', datasets, "#db2777");
+
+        // let myLineChart = new Chart(ctx, {
+        //   type: 'line',
+        //   data: {
+        //     labels: labels,
+        //     datasets: [
+        //       {
+        //         label: 'Temperature',
+        //         data: dataset1Data,
+        //         // borderWidth: 2,
+        //         // fill: false,
+        //         borderColor: 'rgb(255, 99, 132)',
+        //       }
+        //     ]
+        //   },
+        //   options: {
+        //     responsive: true,
+        //     scales: {
+        //       x: {
+        //         title: {
+        //           display: true,
+        //           text: 'Temperature',
+        //           font: {
+        //             padding: 4,
+        //             size: 16,
+        //             weight: 'bold',
+        //           },
+        //           color: 'white'
+        //         }
+        //       },
+        //       y: {
+        //         title: {
+        //           display: false,
+        //           text: 'Temperature',
+        //           font: {
+        //             size: 16,
+        //             weight: 'bold'
+        //           },
+        //           color: 'white'
+        //         },
+        //         beginAtZero: true,
+        //         scaleLabel: {
+        //           display: false,
+        //           labelString: 'Values',
+        //         }
+        //       }
+        //     }
+        //   }
+        // });
+      }
+    };
+
+  </script>
+</body>
+
+</html>
