@@ -1,21 +1,8 @@
-// const express = require('express');
-// const app = express();
-// const http = require('http');
-// const server = http.createServer(app);
-// const { Server } = require("socket.io");
-// const io = new Server(server);
-
-// const express = require('express');
-// const app = express();
-// const server = require('http').createServer(app);
-// const io = require('socket.io')(server);
-
 const express = require('express');
-const { createServer } = require('node:http');
-const { Server } = require('socket.io');
-
 const app = express();
-const server = createServer(app);
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
 const io = new Server(server);
 
 const path = require('path');
@@ -32,7 +19,7 @@ admin.initializeApp({
 
 
 
-app.use(express.static(path.join(__dirname, 'assets')));
+app.use(express.static(path.join(__dirname, './public')));
 app.get('/', (_, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
