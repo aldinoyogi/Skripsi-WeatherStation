@@ -78,7 +78,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node .",
-    "watch-css": "npx tailwindcss -i ./assets/css/style.css -o ./assets/css/style-prod.css --watch"
+    "watch-css": "npx tailwindcss -i ./public/css/style.css -o ./public/css/style-prod.css --watch"
   },
   "author": "",
   "license": "ISC"
