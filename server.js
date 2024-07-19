@@ -1,7 +1,6 @@
 const express = require('express');
 const WebSocket = require('ws');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 
 const admin = require("firebase-admin");
 const serviceAccount = require("./weather-station.json");
