@@ -12,7 +12,6 @@
 
 const express = require('express');
 const { createServer } = require('node:http');
-const { join } = require('node:path');
 const { Server } = require('socket.io');
 
 const app = express();
@@ -35,7 +34,7 @@ admin.initializeApp({
 
 app.use(express.static(path.join(__dirname, 'assets')));
 app.get('/', (_, res) => {
-  res.sendFile(join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 
