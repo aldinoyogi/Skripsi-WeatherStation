@@ -5,10 +5,20 @@
 // const { Server } = require("socket.io");
 // const io = new Server(server);
 
+// const express = require('express');
+// const app = express();
+// const server = require('http').createServer(app);
+// const io = require('socket.io')(server);
+
 const express = require('express');
+const { createServer } = require('node:http');
+const { join } = require('node:path');
+const { Server } = require('socket.io');
+
 const app = express();
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
+const server = createServer(app);
+const io = new Server(server);
+
 const path = require('path');
 
 
@@ -19,6 +29,13 @@ const serviceAccount = require("./weather-station.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://weathercast-3d11e-default-rtdb.asia-southeast1.firebasedatabase.app"
+});
+
+
+
+app.use(express.static(path.join(__dirname, 'assets')));
+app.get('/', (_, res) => {
+  res.sendFile(join(__dirname, 'index.html'));
 });
 
 
@@ -55,13 +72,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     delete sockets[socket.id];
   });
-});
-
-
-
-app.use(express.static(path.join(__dirname, 'assets')));
-app.get('/', (_, res) => {
-  res.sendFile(__dirname + '/index.html');
 });
 
 
