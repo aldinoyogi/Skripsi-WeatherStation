@@ -1,10 +1,15 @@
 const express = require('express');
-const WebSocket = require('ws');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 const path = require('path');
+
+
 
 const admin = require("firebase-admin");
 const serviceAccount = require("./weather-station.json");
-
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -13,47 +18,47 @@ admin.initializeApp({
 
 
 
-const app = express();
-const server = app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+app.use(express.static(path.join(__dirname, 'assets')));
+app.get('/', (_, res) => {
+  res.sendFile(__dirname + '/index.html');
 });
 
-// WebSocket server
-const wss = new WebSocket.Server({ server });
+const sockets = {};
 
 const realtime_db = admin.database();
 realtime_db.ref("Weather_Station_A/realtime").on("value", (snapshot) => {
-  console.log("HIT 1")
   const data = snapshot.val();
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      const message = {
-        type: 'realtime',
-        data
-      }
-      client.send(JSON.stringify(message));
+  Object.keys(sockets).forEach((key) => {
+    const socket = sockets[key];
+    const message = {
+      type: 'realtime',
+      data
     }
-  });
+    socket.emit("data", message);
+  })
 });
 
-
-wss.on('connection', (ws) => {
+io.on('connection', (socket) => {
+  sockets[socket.id] = socket;
   realtime_db.ref("Weather_Station_A/realtime").get().then((snapshot) => {
-    console.log("HIT 2")
     if (snapshot.exists()) {
       const data = snapshot.val();
       const message = {
         type: 'realtime',
         data
       }
-      ws.send(JSON.stringify(message));
+      socket.emit("data", message);
     }
   })
-  ws.send(JSON.stringify({ type: 'history_perminutes', data: null }));
+
+  socket.emit("data", { type: "history_perminutes", data: null })
+
+  socket.on('disconnect', () => {
+    delete sockets[socket.id];
+  });
 });
 
 
-app.use(express.static(path.join(__dirname, 'assets')));
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+server.listen(3000, () => {
+  console.log('listening on *:3000');
 });
