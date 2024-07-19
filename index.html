@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
     integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <title>Tugas besar</title>
 </head>
 
@@ -135,7 +135,6 @@
     socket.on('connect', () => {
       socket.on("data", (event) => {
         const { type, data } = event;
-        console.log(data);
 
         if (type === 'realtime') {
           const humidity = document.getElementById('humidity');
@@ -165,88 +164,6 @@
         }
       })
     });
-
-    // ws.onmessage = function (event) {
-    //   const { type, data } = JSON.parse(event.data);
-    //   console.log(data);
-
-    //   if (type === 'realtime') {
-    //     const humidity = document.getElementById('humidity');
-    //     const temperature = document.getElementById('temperature');
-    //     const adcraindrop = document.getElementById('adcraindrop');
-    //     const pressure = document.getElementById('pressure');
-    //     const city = document.getElementById('city');
-    //     humidity.innerText = `${data.humidity}%`;
-    //     temperature.innerText = `${data.temperature}°C`;
-    //     adcraindrop.innerText = `${data.adc_raindrop} mm/h`;
-    //     pressure.innerText = `${data.pressure} hPa`;
-    //   }
-
-    //   if (type == "history_perminutes") {
-    //     const tempCtx = document.getElementById('chartTemperature').getContext('2d');
-    //     const pressureCtx = document.getElementById('chartPressure').getContext('2d');
-    //     const humidityCtx = document.getElementById('chartHumidity').getContext('2d');
-    //     const adcraindropCtx = document.getElementById('chartADCAirdrop').getContext('2d');
-
-    //     const labels = ['January', 'February', 'March', 'April', 'May'];
-    //     const datasets = [10, 25, 13, 18, 30];
-
-    //     createLineChart(tempCtx, labels, 'Temperature', datasets, "#f59e0b");
-    //     createLineChart(pressureCtx, labels, 'Pressure', datasets, "#84cc16");
-    //     createLineChart(humidityCtx, labels, 'Humidity', datasets, "#0284c7");
-    //     createLineChart(adcraindropCtx, labels, 'ADC Rain Drop', datasets, "#db2777");
-
-    // let myLineChart = new Chart(ctx, {
-    //   type: 'line',
-    //   data: {
-    //     labels: labels,
-    //     datasets: [
-    //       {
-    //         label: 'Temperature',
-    //         data: dataset1Data,
-    //         // borderWidth: 2,
-    //         // fill: false,
-    //         borderColor: 'rgb(255, 99, 132)',
-    //       }
-    //     ]
-    //   },
-    //   options: {
-    //     responsive: true,
-    //     scales: {
-    //       x: {
-    //         title: {
-    //           display: true,
-    //           text: 'Temperature',
-    //           font: {
-    //             padding: 4,
-    //             size: 16,
-    //             weight: 'bold',
-    //           },
-    //           color: 'white'
-    //         }
-    //       },
-    //       y: {
-    //         title: {
-    //           display: false,
-    //           text: 'Temperature',
-    //           font: {
-    //             size: 16,
-    //             weight: 'bold'
-    //           },
-    //           color: 'white'
-    //         },
-    //         beginAtZero: true,
-    //         scaleLabel: {
-    //           display: false,
-    //           labelString: 'Values',
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
-    //   }
-    // };
-
   </script>
 </body>
 

@@ -17,12 +17,6 @@ admin.initializeApp({
 });
 
 
-
-app.use(express.static(path.join(__dirname, 'assets')));
-app.get('/', (_, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-
 const sockets = {};
 
 const realtime_db = admin.database();
@@ -56,6 +50,13 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     delete sockets[socket.id];
   });
+});
+
+
+
+app.use(express.static(path.join(__dirname, 'assets')));
+app.get('/', (_, res) => {
+  res.sendFile(__dirname + '/index.html');
 });
 
 
