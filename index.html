@@ -76,7 +76,7 @@
 
   <script>
     var host = window.location.host;
-    const ws = new WebSocket(`ws://${host}/ws`);
+    const ws = new WebSocket(`wss://${host}/ws`);
 
     const createLineChart = (ctx, labels, title, dataset, borderColor) => {
       return new Chart(ctx, {
