@@ -79,6 +79,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const socket = io("/", { transport: ["polling"], closeOnBeforeunload: false });
+
       const createLineChart = (ctx, labels, title, dataset, borderColor) => {
         return new Chart(ctx, {
           type: 'line',
@@ -108,7 +109,7 @@
                   text: title,
                   color: "white",
                   font: {
-                    size: 12,
+                    size: 14,
                     weight: "bold"
                   }
                 },
@@ -132,6 +133,13 @@
         });
       }
 
+      const updatedChart = (dataset, chartContext) => {
+        chartContext.data.datasets[0].data = dataset;
+        chartContext.update();
+      }
+
+      const initiateChart = false;
+      let chartTemperature, chartPressure, chartHumidity, chartADCAirdrop;
 
       socket.on('connect', () => {
         socket.on("data", (event) => {
@@ -156,12 +164,34 @@
             const adcraindropCtx = document.getElementById('chartADCAirdrop').getContext('2d');
 
             const labels = ['January', 'February', 'March', 'April', 'May'];
-            const datasets = [10, 25, 13, 18, 30];
+            const datasetsTemp = Array.from({length: 5}, () => Math.floor(Math.random() * 10) + 1);
+            const datasetsPressure = Array.from({length: 5}, () => Math.floor(Math.random() * 10) + 1);
+            const datasetsHumidity = Array.from({length: 5}, () => Math.floor(Math.random() * 10) + 1);
+            const datasetsADCAirdrop = Array.from({length: 5}, () => Math.floor(Math.random() * 10) + 1);
 
-            // createLineChart(tempCtx, labels, 'Temperature', datasets, "#f59e0b");
-            // createLineChart(pressureCtx, labels, 'Pressure', datasets, "#84cc16");
-            // createLineChart(humidityCtx, labels, 'Humidity', datasets, "#0284c7");
-            // createLineChart(adcraindropCtx, labels, 'ADC Rain Drop', datasets, "#db2777");
+            if (chartTemperature == null) {
+              chartTemperature = createLineChart(tempCtx, labels, 'Temperature', datasetsTemp, "#f59e0b");
+            } else {
+              updatedChart(datasetsTemp, chartTemperature);
+            }
+
+            if (chartPressure == null) {
+              chartPressure = createLineChart(pressureCtx, labels, 'Pressure', datasetsPressure, "#84cc16");
+            } else {
+              updatedChart(datasetsPressure, chartPressure);
+            }
+
+            if (chartHumidity == null) {
+              chartHumidity = createLineChart(humidityCtx, labels, 'Humidity', datasetsHumidity, "#0284c7");
+            } else {
+              updatedChart(datasetsHumidity, chartHumidity);
+            }
+
+            if (chartADCAirdrop == null) {
+              chartADCAirdrop = createLineChart(adcraindropCtx, labels, 'ADC Rain Drop', datasetsADCAirdrop, "#db2777");
+            } else {
+              updatedChart(datasetsADCAirdrop, chartADCAirdrop);
+            }
           }
 
           if (type == "dummy") {
@@ -170,7 +200,6 @@
         })
       });
     })
-    // const socket = io("/", { transport: ["websocket", "polling"] });
   </script>
 </body>
 
