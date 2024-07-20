@@ -78,8 +78,7 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // const socket = io("/", { transport: ["websocket", "polling"] });
-      const socket = io();
+      const socket = io("/", { transport: ["polling"] });
       const createLineChart = (ctx, labels, title, dataset, borderColor) => {
         return new Chart(ctx, {
           type: 'line',
