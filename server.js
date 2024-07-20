@@ -1,19 +1,7 @@
 const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
-const { Server } = require("socket.io");
-
-const io = new Server(server, {
-  connectionStateRecovery: {
-    maxDisconnectionDuration: 2 * 60 * 1000,
-    skipMiddlewares: true,
-  }
-})
-
-
-
-
-// const io = require('socket.io')(server);
+const io = require('socket.io')(server);
 
 
 const path = require('path');
