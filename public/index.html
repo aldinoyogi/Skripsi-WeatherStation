@@ -78,7 +78,7 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const socket = io("/", { transport: ["polling"] });
+      const socket = io("/", { transport: ["polling"], closeOnBeforeunload: false });
       const createLineChart = (ctx, labels, title, dataset, borderColor) => {
         return new Chart(ctx, {
           type: 'line',
@@ -131,12 +131,12 @@
           }
         });
       }
-  
-  
+
+
       socket.on('connect', () => {
         socket.on("data", (event) => {
           const { type, data } = event;
-  
+
           if (type === 'realtime') {
             const humidity = document.getElementById('humidity');
             const temperature = document.getElementById('temperature');
@@ -148,22 +148,22 @@
             adcraindrop.innerText = `${data.adc_raindrop} mm/h`;
             pressure.innerText = `${data.pressure} hPa`;
           }
-  
+
           if (type == "history_perminutes") {
             const tempCtx = document.getElementById('chartTemperature').getContext('2d');
             const pressureCtx = document.getElementById('chartPressure').getContext('2d');
             const humidityCtx = document.getElementById('chartHumidity').getContext('2d');
             const adcraindropCtx = document.getElementById('chartADCAirdrop').getContext('2d');
-  
+
             const labels = ['January', 'February', 'March', 'April', 'May'];
             const datasets = [10, 25, 13, 18, 30];
-  
+
             // createLineChart(tempCtx, labels, 'Temperature', datasets, "#f59e0b");
             // createLineChart(pressureCtx, labels, 'Pressure', datasets, "#84cc16");
             // createLineChart(humidityCtx, labels, 'Humidity', datasets, "#0284c7");
             // createLineChart(adcraindropCtx, labels, 'ADC Rain Drop', datasets, "#db2777");
           }
-  
+
           if (type == "dummy") {
             console.log(data)
           }
