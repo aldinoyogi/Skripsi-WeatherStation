@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- <script src="/socket.io/socket.io.js"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js" integrity="sha512-zoJXRvW2gC8Z0Xo3lBbao5+AS3g6YWr5ztKqaicua11xHo+AvE1b0lT9ODgrHTmNUxeCw0Ry4BGRYZfXu70weg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/image/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/css/style-prod.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
     integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <title>Tugas besar</title>
+  <title>Weather Station</title>
 </head>
 
 
@@ -77,98 +77,100 @@
   </main>
 
   <script>
-    // const socket = io("/", { transport: ["websocket", "polling"] });
-    const socket = io("/", { transport: ["polling"] });
-    const createLineChart = (ctx, labels, title, dataset, borderColor) => {
-      return new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            // label: title,
-            data: dataset,
-            borderWidth: 2,
-            fill: false,
-            color: "white",
-            borderColor: borderColor,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
+    document.addEventListener("DOMContentLoaded", function () {
+      const socket = io("/", { transport: ["websocket", "polling"] });
+      const createLineChart = (ctx, labels, title, dataset, borderColor) => {
+        return new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              // label: title,
+              data: dataset,
+              borderWidth: 2,
+              fill: false,
+              color: "white",
+              borderColor: borderColor,
+            }]
           },
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: title,
-                color: "white",
-                font: {
-                  size: 12,
-                  weight: "bold"
-                }
-              },
-              ticks: {
-                color: "#9ca3af"
-              },
-              grid: {
-                color: "#374151",
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
               }
             },
-            y: {
-              ticks: {
-                color: "#9ca3af"
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: title,
+                  color: "white",
+                  font: {
+                    size: 12,
+                    weight: "bold"
+                  }
+                },
+                ticks: {
+                  color: "#9ca3af"
+                },
+                grid: {
+                  color: "#374151",
+                }
               },
-              grid: {
-                color: "#374151",
+              y: {
+                ticks: {
+                  color: "#9ca3af"
+                },
+                grid: {
+                  color: "#374151",
+                }
               }
-            }
-          },
-        }
+            },
+          }
+        });
+      }
+  
+  
+      socket.on('connect', () => {
+        socket.on("data", (event) => {
+          const { type, data } = event;
+  
+          if (type === 'realtime') {
+            const humidity = document.getElementById('humidity');
+            const temperature = document.getElementById('temperature');
+            const adcraindrop = document.getElementById('adcraindrop');
+            const pressure = document.getElementById('pressure');
+            const city = document.getElementById('city');
+            humidity.innerText = `${data.humidity}%`;
+            temperature.innerText = `${data.temperature}°C`;
+            adcraindrop.innerText = `${data.adc_raindrop} mm/h`;
+            pressure.innerText = `${data.pressure} hPa`;
+          }
+  
+          if (type == "history_perminutes") {
+            const tempCtx = document.getElementById('chartTemperature').getContext('2d');
+            const pressureCtx = document.getElementById('chartPressure').getContext('2d');
+            const humidityCtx = document.getElementById('chartHumidity').getContext('2d');
+            const adcraindropCtx = document.getElementById('chartADCAirdrop').getContext('2d');
+  
+            const labels = ['January', 'February', 'March', 'April', 'May'];
+            const datasets = [10, 25, 13, 18, 30];
+  
+            // createLineChart(tempCtx, labels, 'Temperature', datasets, "#f59e0b");
+            // createLineChart(pressureCtx, labels, 'Pressure', datasets, "#84cc16");
+            // createLineChart(humidityCtx, labels, 'Humidity', datasets, "#0284c7");
+            // createLineChart(adcraindropCtx, labels, 'ADC Rain Drop', datasets, "#db2777");
+          }
+  
+          if (type == "dummy") {
+            console.log(data)
+          }
+        })
       });
-    }
-
-
-    socket.on('connect', () => {
-      socket.on("data", (event) => {
-        const { type, data } = event;
-
-        if (type === 'realtime') {
-          const humidity = document.getElementById('humidity');
-          const temperature = document.getElementById('temperature');
-          const adcraindrop = document.getElementById('adcraindrop');
-          const pressure = document.getElementById('pressure');
-          const city = document.getElementById('city');
-          humidity.innerText = `${data.humidity}%`;
-          temperature.innerText = `${data.temperature}°C`;
-          adcraindrop.innerText = `${data.adc_raindrop} mm/h`;
-          pressure.innerText = `${data.pressure} hPa`;
-        }
-
-        if (type == "history_perminutes") {
-          const tempCtx = document.getElementById('chartTemperature').getContext('2d');
-          const pressureCtx = document.getElementById('chartPressure').getContext('2d');
-          const humidityCtx = document.getElementById('chartHumidity').getContext('2d');
-          const adcraindropCtx = document.getElementById('chartADCAirdrop').getContext('2d');
-
-          const labels = ['January', 'February', 'March', 'April', 'May'];
-          const datasets = [10, 25, 13, 18, 30];
-
-          // createLineChart(tempCtx, labels, 'Temperature', datasets, "#f59e0b");
-          // createLineChart(pressureCtx, labels, 'Pressure', datasets, "#84cc16");
-          // createLineChart(humidityCtx, labels, 'Humidity', datasets, "#0284c7");
-          // createLineChart(adcraindropCtx, labels, 'ADC Rain Drop', datasets, "#db2777");
-        }
-
-        if (type == "dummy") {
-          console.log(data)
-        }
-      })
-    });
+    })
+    // const socket = io("/", { transport: ["websocket", "polling"] });
   </script>
 </body>
 
