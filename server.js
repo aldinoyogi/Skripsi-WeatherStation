@@ -7,15 +7,18 @@
 
 const express = require('express');
 const app = express();
-const server = require('http').Server(app);
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+// const app = express();
+// const server = require('http').Server(app);
 const port = process.env.PORT || 3000;
 
-const io = require('socket.io')(server, {
-  cors: {
-    methods: ["GET", "POST"],
-    origin: "*"
-  }
-});
+// const io = require('socket.io')(server, {
+//   cors: {
+//     methods: ["GET", "POST"],
+//     origin: "*"
+//   }
+// });
 
 
 const path = require('path');
