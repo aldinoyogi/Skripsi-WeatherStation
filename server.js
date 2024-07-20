@@ -13,20 +13,10 @@ const port = process.env.PORT || 3000;
 const io = require('socket.io')(server, {
   cors: {
     methods: ["GET", "POST"],
-    allowedHeaders: ['Access-Control-Allow-Origin'],
-    credentials: false,
-    port: port
+    origin: "*"
   }
 });
 
-// const io = new Server(server, {
-//   cors: {
-//     methods: ["GET", "POST"],
-//     allowedHeaders: ['Access-Control-Allow-Origin'],
-//     credentials: false,
-//     port: PORT
-//   }
-// });
 
 const path = require('path');
 
@@ -42,9 +32,9 @@ const path = require('path');
 
 
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname + '/public')));
 app.get('/', (_, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname + '/public/index.html'));
 });
 
 
@@ -77,13 +67,14 @@ io.on('connection', (socket) => {
   // })
 
   // socket.emit("data", { type: "history_perminutes", data: null })
+  socket.emit("data", { type: "dummy", data: "Hello" })
   const sendMessage = setInterval(() => {
     socket.emit("data", { type: "dummy", data: "Hello" })
   }, 2000)
 
   socket.on('disconnect', () => {
     clearInterval(sendMessage);
-    socket.disconnect();
+    // socket.disconnect();
     delete sockets[socket.id];
   });
 });
