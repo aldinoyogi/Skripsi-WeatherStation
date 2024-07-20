@@ -10,7 +10,14 @@ const app = express();
 const server = require('http').Server(app);
 const port = process.env.PORT || 3000;
 
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+  cors: {
+    methods: ["GET", "POST"],
+    allowedHeaders: ['Access-Control-Allow-Origin'],
+    credentials: false,
+    port: port
+  }
+});
 
 // const io = new Server(server, {
 //   cors: {
