@@ -78,7 +78,7 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const socket = io("/", { transport: ["polling"], closeOnBeforeunload: false });
+      const socket = io("/", { transport: ["polling"], closeOnBeforeunload: false, upgrade: false });
 
       const createLineChart = (ctx, labels, title, dataset, borderColor) => {
         return new Chart(ctx, {
