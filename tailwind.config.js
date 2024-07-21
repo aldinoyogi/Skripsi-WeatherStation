@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["index.{html,js}", "server.js"],
+  content: ["stationa.{html,js}", "stationb.{html,js}", "server.js"],
   theme: {
     extend: {},
   },

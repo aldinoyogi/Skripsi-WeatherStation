@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="shortcut icon" href="/image/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/css/style-prod.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+    integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+  <title>Weather Station B</title>
+</head>
+
+
+<body class="bg-slate-900">
+  <main class="min-h-screen min-w-screen flex justify-center items-center">
+
+    <div id="componentScreen"
+      class="max-w-7xl w-full m-auto flex justify-between items-center text-white flex-col h-screen p-12 md:p-12 space-y-6">
+      <div class="flex justify-between items-start w-full">
+        <div class="flex flex-col">
+          <p id="city" class="text-gray-400">Tugas Akhir</p>
+          <h1 class="font-bold text-3xl md:text-5xl">Weather Station B</h1>
+        </div>
+        <div class="md:flex flex-col hidden justify-end items-end h-full">
+          <p id="date" class="text-gray-400 font-semibold text-sm"></p>
+          <p id="time" class="text-white font-bold text-base"></p>
+        </div>
+      </div>
+
+      <div class="w-full">
+        <div class="flex justify-between items-center">
+          <h1 class="font-bold text-xl md:text-2xl mb-5 mt-3">Last 30 Minutes Timeseries</h1>
+          <a class="flex space-x-3 bg-sky-600 px-4 py-1 rounded-lg w-fit justify-center items-center mt-2"
+            href="/">
+            <span class="font-semibold">Go to Station A</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 w-full gap-4 md:gap-12">
+          <div>
+            <canvas class="!w-full !h-full" id="chartTemperature"></canvas>
+          </div>
+          <div>
+            <canvas class="!w-full !h-full" id="chartPressure"></canvas>
+          </div>
+          <div>
+            <canvas class="!w-full !h-full" id="chartADCAirdrop"></canvas>
+          </div>
+          <div>
+            <canvas class="!w-full !h-full" id="chartHumidity"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full pb-5">
+        <div class="flex justify-center items-start flex-col">
+          <div class="flex space-x-2 justify-center items-start text-gray-400">
+            <i class="fa-solid fa-droplet"></i>
+            <p class="text-sm md:text-md font-semibold">Humidity</p>
+          </div>
+          <p class="text-lg md:text-3xl font-bold" id="humidity">...</p>
+        </div>
+        <div class="flex justify-center items-start md:items-center flex-col">
+          <div class="flex space-x-2 justify-center items-start text-gray-400">
+            <i class="fa-solid fa-temperature-three-quarters"></i>
+            <p class="text-sm md:text-md font-semibold">Temperature</p>
+          </div>
+          <p class="text-lg md:text-3xl font-bold" id="temperature">...</p>
+        </div>
+        <div class="flex justify-center items-start md:items-center flex-col">
+          <div class="flex space-x-2 justify-center items-start text-gray-400">
+            <i class="fa-solid fa-wind"></i>
+            <p class="text-sm md:text-md font-semibold">ADC Rain Drop</p>
+          </div>
+          <p class="text-lg md:text-3xl font-bold" id="adcraindrop">...</p>
+        </div>
+        <div class="flex justify-center items-start md:items-center flex-col">
+          <div class="flex space-x-2 justify-center items-start text-gray-400">
+            <i class="fa-solid fa-up-down"></i>
+            <p class="text-sm md:text-md font-semibold">Pressure</p>
+          </div>
+          <p class="text-lg md:text-3xl font-bold" id="pressure">...</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const socket_channel = "/b";
+      const socket = io("/", { transport: ["websocket", "polling"] });
+
+      const dateElement = document.getElementById("date");
+      const timeElement = document.getElementById("time");
+
+      const datenow = moment().format("DD-MMM-YYYY");
+      dateElement.innerHTML = datenow;
+
+      const timenow = moment().format("HH:mm:ss");
+      timeElement.innerHTML = timenow;
+
+      setInterval(() => {
+        const now = moment().format("DD-MMM-YYYY");
+        dateElement.innerHTML = now;
+      }, 1000);
+
+      setInterval(() => {
+        const now = moment().format("HH:mm:ss");
+        timeElement.innerHTML = now;
+      }, 1000);
+
+      const createLineChart = (ctx, labels, title, datasets) => {
+        return new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true
+              }
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: title,
+                  color: "white",
+                  font: {
+                    size: 14,
+                    weight: "bold"
+                  }
+                },
+                ticks: {
+                  color: "#9ca3af",
+                  beginAtZero: true
+                },
+                grid: {
+                  color: "#374151",
+                }
+              },
+              y: {
+                ticks: {
+                  color: "#9ca3af",
+                  beginAtZero: true
+                },
+                grid: {
+                  color: "#374151",
+                }
+              }
+            },
+          }
+        });
+      }
+
+      const updatedChart = (datasets, chartContext, labels) => {
+        chartContext.data.datasets = datasets;
+        chartContext.data.labels = labels;
+        chartContext.update();
+      }
+
+      const shorDataByDateAndTime = (data) => {
+        data.sort((a, b) => {
+          const dateTimeA = moment(`${a.date} ${a.time}`, 'YYYY-MM-DD HH:mm:ss');
+          const dateTimeB = moment(`${b.date} ${b.time}`, 'YYYY-MM-DD HH:mm:ss');
+          return dateTimeA - dateTimeB;
+        });
+        return data;
+      }
+
+      const initiateChart = false;
+      let labels, data_minutes, data_averages;
+      let chartTemperature, chartPressure, chartHumidity, chartADCAirdrop;
+
+      const tempCtx = document.getElementById('chartTemperature').getContext('2d');
+      const pressureCtx = document.getElementById('chartPressure').getContext('2d');
+      const humidityCtx = document.getElementById('chartHumidity').getContext('2d');
+      const adcraindropCtx = document.getElementById('chartADCAirdrop').getContext('2d');
+
+      socket.on('connect', () => {
+        socket.emit("channel", socket_channel);
+        socket.on("data", (event) => {
+          const { type, data } = event;
+
+          if (type === 'realtime') {
+            const humidity = document.getElementById('humidity');
+            const temperature = document.getElementById('temperature');
+            const adcraindrop = document.getElementById('adcraindrop');
+            const pressure = document.getElementById('pressure');
+            const city = document.getElementById('city');
+            humidity.innerText = `${data.kelembaban}%`;
+            temperature.innerText = `${data.suhu}°C`;
+            adcraindrop.innerText = `${data.raindrop} mm/h`;
+            pressure.innerText = `${data.tekanan} hPa`;
+          }
+
+
+          if (type == "timeseries") {
+            if (data.minutes && data.averages) {
+              data_minutes = shorDataByDateAndTime(data?.minutes);
+              data_averages = shorDataByDateAndTime(data?.averages);
+              labels = shorDataByDateAndTime(data_minutes).map(item => `${item.time.replace(/(\:\d\d)$/g, "")}`);
+            }
+
+            if (data.minutes && !data.averages) {
+              data_minutes = shorDataByDateAndTime(data?.minutes);
+              labels = shorDataByDateAndTime(data_minutes).map(item => `${item.time.replace(/(\:\d\d)$/g, "")}`);
+            }
+
+            if (!data.minutes && data.averages) {
+              data_averages = shorDataByDateAndTime(data?.averages);
+              labels = shorDataByDateAndTime(data_averages).map(item => `${item.time.replace(/(\:\d\d)$/g, "")}`);
+            }
+
+            const dataset_temp_minutes = data_minutes.map(item => item.suhuAverage);
+            const dataset_temp_averages = data_averages.map(item => item.suhuAverage);
+
+            const dataset_humidity_minutes = data_minutes.map(item => item.kelembabanAverage);
+            const dataset_humidity_averages = data_averages.map(item => item.kelembabanAverage);
+
+            const dataset_pressure_minutes = data_minutes.map(item => item.tekananAverage);
+            const dataset_pressure_averages = data_averages.map(item => item.tekananAverage);
+
+            const dataset_adcraindrop_minutes = data_minutes.map(item => item.raindropAverage);
+            const dataset_adcraindrop_averages = data_averages.map(item => item.raindropAverage);
+
+            const datasets_temp = [
+              {
+                label: "Temp (°C)",
+                data: dataset_temp_minutes,
+                borderWidth: 2,
+                borderColor: "#f97316",
+              },
+              {
+                label: "Temp (°C) Avg",
+                data: dataset_temp_averages,
+                borderWidth: 2,
+                borderColor: "#fed7aa",
+              }
+            ];
+
+            const datasetsHumidity = [
+              {
+                label: "Humidity (%)",
+                data: dataset_humidity_minutes,
+                borderWidth: 2,
+                borderColor: "#22c55e",
+              },
+              {
+                label: "Humidity (%) Avg",
+                data: dataset_humidity_averages,
+                borderWidth: 2,
+                borderColor: "#bbf7d0",
+              }
+            ];
+
+            const datasetsPressure = [
+              {
+                label: "Pressure (hPa)",
+                data: dataset_pressure_minutes,
+                borderWidth: 2,
+                borderColor: "#0ea5e9",
+              },
+              {
+                label: "Pressure (hPa) Avg",
+                data: dataset_pressure_averages,
+                borderWidth: 2,
+                borderColor: "#bae6fd",
+              }
+            ];
+
+            const datasetsADCAirdrop = [
+              {
+                label: "Rain Drop (mm/h)",
+                data: dataset_adcraindrop_minutes,
+                borderWidth: 2,
+                borderColor: "#a855f7",
+              },
+              {
+                label: "Rain Drop (mm/h) Avg",
+                data: dataset_adcraindrop_averages,
+                borderWidth: 2,
+                borderColor: "#e9d5ff",
+              }
+            ];
+
+
+            if (chartTemperature == null) {
+              chartTemperature = createLineChart(tempCtx, labels, 'Temperature', datasets_temp);
+            } else {
+              updatedChart(datasets_temp, chartTemperature, labels);
+            }
+
+            if (chartHumidity == null) {
+              chartHumidity = createLineChart(humidityCtx, labels, 'Humidity', datasetsHumidity);
+            } else {
+              updatedChart(datasetsHumidity, chartHumidity, labels);
+            }
+
+            if (chartPressure == null) {
+              chartPressure = createLineChart(pressureCtx, labels, 'Pressure', datasetsPressure);
+            } else {
+              updatedChart(datasetsPressure, chartPressure, labels);
+            }
+
+            if (chartADCAirdrop == null) {
+              chartADCAirdrop = createLineChart(adcraindropCtx, labels, 'ADC Rain Drop', datasetsADCAirdrop);
+            } else {
+              updatedChart(datasetsADCAirdrop, chartADCAirdrop, labels);
+            }
+          }
+        })
+      });
+    })
+  </script>
+</body>
+
+</html>

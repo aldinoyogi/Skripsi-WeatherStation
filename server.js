@@ -16,21 +16,26 @@ const realtimeDatabase = new GetFirebaseRecord();
 
 realtimeDatabase.setListenerRealtimeA();
 realtimeDatabase.setInitiateHistoryPerMinutesA();
-realtimeDatabase.setListenHistoryPerMinutesA();
+realtimeDatabase.setListenerHistoryPerMinutesA();
 realtimeDatabase.setInitiateHistoryAverageA();
-realtimeDatabase.setListenHistoryAverageA();
+realtimeDatabase.setListenerHistoryAverageA();
 
 
 realtimeDatabase.setListenerRealtimeB();
 realtimeDatabase.setInitiateHistoryPerMinutesB();
-realtimeDatabase.setListenHistoryPerMinutesB();
+realtimeDatabase.setListenerHistoryPerMinutesB();
 realtimeDatabase.setInitiateHistoryAverageB();
-realtimeDatabase.setListenHistoryAverageB();
+realtimeDatabase.setListenerHistoryAverageB();
 
 
 app.use(express.static(path.join(__dirname + '/public')));
+
 app.get('/', (_, res) => {
-  res.sendFile(path.join(__dirname + '/index.html'));
+  res.sendFile(path.join(__dirname + '/stationa.html'));
+});
+
+app.get('/station-b', (_, res) => {
+  res.sendFile(path.join(__dirname + '/stationb.html'));
 });
 
 

@@ -100,7 +100,7 @@ class GetFirebaseRecord {
     })
   }
 
-  setListenHistoryPerMinutesA = () => {
+  setListenerHistoryPerMinutesA = () => {
     this.query_history_perminutes_a.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
@@ -108,6 +108,15 @@ class GetFirebaseRecord {
         this.history_perminutes_a.shift();
         this.history_perminutes_a.push(_data);
         this.history_perminutes_a = Object.values(this.history_perminutes_a).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
+
+        this.sockets.forEach(socket => {
+          if (socket.channel == "/a") socket.socket.emit("data", {
+            type: "timeseries", data: {
+              minutes: this.history_perminutes_a,
+            }
+          });
+        })
+
       }
     })
   }
@@ -123,7 +132,7 @@ class GetFirebaseRecord {
     })
   }
 
-  setListenHistoryAverageA = () => {
+  setListenerHistoryAverageA = () => {
     this.query_history_average_a.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
@@ -131,6 +140,14 @@ class GetFirebaseRecord {
         this.history_average_a.shift();
         this.history_average_a.push(_data);
         this.history_average_a = Object.values(this.history_average_a).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
+      
+        this.sockets.forEach(socket => {
+          if (socket.channel == "/a") socket.socket.emit("data", {
+            type: "timeseries", data: {
+              averages: this.history_average_a,
+            }
+          });
+        })
       }
     })
   }
@@ -146,7 +163,7 @@ class GetFirebaseRecord {
     })
   }
 
-  setListenHistoryPerMinutesB = () => {
+  setListenerHistoryPerMinutesB = () => {
     this.query_history_perminutes_b.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
@@ -154,6 +171,14 @@ class GetFirebaseRecord {
         this.history_perminutes_b.shift();
         this.history_perminutes_b.push(_data);
         this.history_perminutes_b = Object.values(this.history_perminutes_b).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
+      
+        this.sockets.forEach(socket => {
+          if (socket.channel == "/b") socket.socket.emit("data", {
+            type: "timeseries", data: {
+              minutes: this.history_perminutes_b,
+            }
+          });
+        })
       }
     })
   }
@@ -169,7 +194,7 @@ class GetFirebaseRecord {
     })
   }
 
-  setListenHistoryAverageB = () => {
+  setListenerHistoryAverageB = () => {
     this.query_history_perminutes_b.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
@@ -177,6 +202,14 @@ class GetFirebaseRecord {
         this.history_average_b.shift();
         this.history_average_b.push(_data);
         this.history_average_b = Object.values(this.history_average_b).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
+      
+        this.sockets.forEach(socket => {
+          if (socket.channel == "/b") socket.socket.emit("data", {
+            type: "timeseries", data: {
+              averages: this.history_average_b,
+            }
+          });
+        });
       }
     })
   }
