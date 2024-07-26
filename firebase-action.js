@@ -9,8 +9,26 @@ admin.initializeApp({
 
 admin.database.enableLogging(false);
 
+
+
+
 class GetFirebaseRecord {
 
+  /**
+   * Initializes the instance of the GetFirebaseRecord class.
+   *
+   * This constructor initializes the instance variables of the class, including:
+   * - `db`: the Firebase Realtime Database instance
+   * - `sockets`: a Map to store socket connections
+   * - `datetime_start_at`: the start time for the 30-minute window
+   * - `datetime_now`: the current time
+   * - `realtime_a`, `history_perminutes_a`, `history_average_b`: empty objects and arrays
+   * - `realtime_b`, `history_perminutes_b`, `history_average_a`: empty objects and arrays
+   * - `query_realtime_a`, `query_history_perminutes_a`, `query_history_average_a`: Firebase Realtime Database references for Weather Station A
+   * - `query_realtime_b`, `query_history_perminutes_b`, `query_history_average_b`: Firebase Realtime Database references for Weather Station B
+   *
+   * @return {void}
+   */
   constructor() {
     this.db = admin.database();
     this.sockets = new Map();
@@ -36,6 +54,11 @@ class GetFirebaseRecord {
   }
 
 
+  /*
+  Adds a socket to the Map with its channel. If the channel is "/a", 
+  it emits "data" events to the socket with the realtime data and timeseries data 
+  for Weather Station A. If the channel is "/b", it does the same for Weather Station B
+  */
   addSocket = (socket, channel) => {
     this.sockets.set(socket.id, { socket, channel });
 
@@ -61,11 +84,17 @@ class GetFirebaseRecord {
   }
 
 
+  /*
+  Removes the socket from the Map
+  */
   deleteSocket = (socket) => {
     this.sockets.delete(socket.id);
   }
 
 
+  /*
+  Sets listeners to the Realtime Database Station A
+  */
   setListenerRealtimeA = () => {
     this.query_realtime_a.on("value", (snapshot) => {
       if (snapshot.exists()) {
@@ -77,6 +106,10 @@ class GetFirebaseRecord {
     })
   }
 
+
+  /*
+  Sets listeners to the Realtime Database Station B
+  */
   setListenerRealtimeB = () => {
     this.query_realtime_b.on("value", (snapshot) => {
       if (snapshot.exists()) {
@@ -89,6 +122,9 @@ class GetFirebaseRecord {
   }
 
 
+  /*
+  Sets init data of History PerMinutes Database Station A
+  */
   setInitiateHistoryPerMinutesA = () => {
     const date_start = this.datetime_start_at.format("YYYY-MM-DD");
     this.query_history_perminutes_a.orderByChild("date").startAt(date_start).limitToLast(30).once("value", (snapshot) => {
@@ -100,6 +136,10 @@ class GetFirebaseRecord {
     })
   }
 
+
+  /*
+  Sets listeners to the History PerMinutes Database Station A
+  */
   setListenerHistoryPerMinutesA = () => {
     this.query_history_perminutes_a.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
@@ -121,6 +161,10 @@ class GetFirebaseRecord {
     })
   }
 
+
+  /*
+  Sets init data of History Average Database Station A
+  */
   setInitiateHistoryAverageA = () => {
     const date_start = this.datetime_start_at.format("YYYY-MM-DD");
     this.query_history_average_a.orderByChild("date").startAt(date_start).limitToLast(30).once("value", (snapshot) => {
@@ -132,6 +176,10 @@ class GetFirebaseRecord {
     })
   }
 
+
+  /*
+  Sets listeners to the History Average Database Station A
+  */
   setListenerHistoryAverageA = () => {
     this.query_history_average_a.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
@@ -140,7 +188,7 @@ class GetFirebaseRecord {
         this.history_average_a.shift();
         this.history_average_a.push(_data);
         this.history_average_a = Object.values(this.history_average_a).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
-      
+
         this.sockets.forEach(socket => {
           if (socket.channel == "/a") socket.socket.emit("data", {
             type: "timeseries", data: {
@@ -152,6 +200,10 @@ class GetFirebaseRecord {
     })
   }
 
+
+  /*
+  Sets init data of History PerMinutes Database Station B
+  */
   setInitiateHistoryPerMinutesB = () => {
     const date_start = this.datetime_start_at.format("YYYY-MM-DD");
     this.query_history_perminutes_b.orderByChild("date").startAt(date_start).limitToLast(30).once("value", (snapshot) => {
@@ -163,6 +215,10 @@ class GetFirebaseRecord {
     })
   }
 
+
+  /*
+  Sets listeners to the History PerMinutes Database Station B
+  */
   setListenerHistoryPerMinutesB = () => {
     this.query_history_perminutes_b.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
@@ -171,7 +227,7 @@ class GetFirebaseRecord {
         this.history_perminutes_b.shift();
         this.history_perminutes_b.push(_data);
         this.history_perminutes_b = Object.values(this.history_perminutes_b).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
-      
+
         this.sockets.forEach(socket => {
           if (socket.channel == "/b") socket.socket.emit("data", {
             type: "timeseries", data: {
@@ -183,6 +239,10 @@ class GetFirebaseRecord {
     })
   }
 
+
+  /*
+  Sets init data of History Average Database Station B
+  */
   setInitiateHistoryAverageB = () => {
     const date_start = this.datetime_start_at.format("YYYY-MM-DD");
     this.query_history_average_b.orderByChild("date").startAt(date_start).limitToLast(30).once("value", (snapshot) => {
@@ -194,6 +254,10 @@ class GetFirebaseRecord {
     })
   }
 
+
+  /*
+  Sets listeners to the History Average Database Station B
+  */
   setListenerHistoryAverageB = () => {
     this.query_history_perminutes_b.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
@@ -202,7 +266,7 @@ class GetFirebaseRecord {
         this.history_average_b.shift();
         this.history_average_b.push(_data);
         this.history_average_b = Object.values(this.history_average_b).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
-      
+
         this.sockets.forEach(socket => {
           if (socket.channel == "/b") socket.socket.emit("data", {
             type: "timeseries", data: {
