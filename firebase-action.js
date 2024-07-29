@@ -127,7 +127,7 @@ class GetFirebaseRecord {
   */
   setInitiateHistoryPerMinutesA = () => {
     const date_start = this.datetime_start_at.format("YYYY-MM-DD");
-    this.query_history_perminutes_a.orderByChild("date").startAt(date_start).limitToLast(30).once("value", (snapshot) => {
+    this.query_history_perminutes_a.limitToLast(30).once("value", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const data = Object.values(_data).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(this.datetime_start_at))
@@ -145,10 +145,11 @@ class GetFirebaseRecord {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const date_start_at_now = moment().subtract(30, "minutes");
-        this.history_perminutes_a.shift();
+        if (this.history_perminutes_a.length > 30) {
+          this.history_perminutes_a.shift();
+        }
         this.history_perminutes_a.push(_data);
         this.history_perminutes_a = Object.values(this.history_perminutes_a).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
-
         this.sockets.forEach(socket => {
           if (socket.channel == "/a") socket.socket.emit("data", {
             type: "timeseries", data: {
@@ -167,7 +168,7 @@ class GetFirebaseRecord {
   */
   setInitiateHistoryAverageA = () => {
     const date_start = this.datetime_start_at.format("YYYY-MM-DD");
-    this.query_history_average_a.orderByChild("date").startAt(date_start).limitToLast(30).once("value", (snapshot) => {
+    this.query_history_average_a.limitToLast(30).once("value", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const data = Object.values(_data).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(this.datetime_start_at))
@@ -185,7 +186,9 @@ class GetFirebaseRecord {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const date_start_at_now = moment().subtract(30, "minutes");
-        this.history_average_a.shift();
+        if (this.history_average_a.length > 30) {
+          this.history_average_a.shift();
+        }
         this.history_average_a.push(_data);
         this.history_average_a = Object.values(this.history_average_a).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
 
@@ -206,7 +209,7 @@ class GetFirebaseRecord {
   */
   setInitiateHistoryPerMinutesB = () => {
     const date_start = this.datetime_start_at.format("YYYY-MM-DD");
-    this.query_history_perminutes_b.orderByChild("date").startAt(date_start).limitToLast(30).once("value", (snapshot) => {
+    this.query_history_perminutes_b.limitToLast(30).once("value", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const data = Object.values(_data).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(this.datetime_start_at))
@@ -224,7 +227,9 @@ class GetFirebaseRecord {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const date_start_at_now = moment().subtract(30, "minutes");
-        this.history_perminutes_b.shift();
+        if (this.history_perminutes_b.length > 30) {
+          this.history_perminutes_b.shift();
+        }
         this.history_perminutes_b.push(_data);
         this.history_perminutes_b = Object.values(this.history_perminutes_b).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
 
@@ -245,7 +250,7 @@ class GetFirebaseRecord {
   */
   setInitiateHistoryAverageB = () => {
     const date_start = this.datetime_start_at.format("YYYY-MM-DD");
-    this.query_history_average_b.orderByChild("date").startAt(date_start).limitToLast(30).once("value", (snapshot) => {
+    this.query_history_average_b.limitToLast(30).once("value", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const data = Object.values(_data).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(this.datetime_start_at))
@@ -263,7 +268,9 @@ class GetFirebaseRecord {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const date_start_at_now = moment().subtract(30, "minutes");
-        this.history_average_b.shift();
+        if (this.history_average_b.length > 30) {
+          this.history_average_b.shift();
+        }
         this.history_average_b.push(_data);
         this.history_average_b = Object.values(this.history_average_b).filter(item => moment(`${item.date} ${item.time}`, "YYYY-MM-DD HH:mm:ss").isAfter(date_start_at_now))
 

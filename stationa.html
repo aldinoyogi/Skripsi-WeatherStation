@@ -208,6 +208,7 @@
 
           if (type == "timeseries") {
             if (data.minutes && data.averages) {
+              console.log(data)
               data_minutes = shorDataByDateAndTime(data?.minutes);
               data_averages = shorDataByDateAndTime(data?.averages);
               labels = shorDataByDateAndTime(data_minutes).map(item => `${item.time.replace(/(\:\d\d)$/g, "")}`);
