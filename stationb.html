@@ -192,8 +192,9 @@
         socket.emit("channel", socket_channel);
         socket.on("data", (event) => {
           const { type, data } = event;
+          console.log(event)
 
-          if (type === 'realtime') {
+          if (type === 'realtime' && data?.channel === socket_channel) {
             const humidity = document.getElementById('humidity');
             const temperature = document.getElementById('temperature');
             const adcraindrop = document.getElementById('adcraindrop');
@@ -206,7 +207,7 @@
           }
 
 
-          if (type == "timeseries") {
+          if (type == "timeseries" && data?.channel === socket_channel) {
             if (data.minutes && data.averages) {
               data_minutes = shorDataByDateAndTime(data?.minutes);
               data_averages = shorDataByDateAndTime(data?.averages);

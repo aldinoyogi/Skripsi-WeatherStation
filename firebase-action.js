@@ -63,21 +63,23 @@ class GetFirebaseRecord {
     this.sockets.set(socket.id, { socket, channel });
 
     if (channel == "/a") {
-      socket.emit("data", { type: "realtime", data: this.realtime_a });
+      socket.emit("data", { type: "realtime", data: { ...this.realtime_a, channel } });
       socket.emit("data", {
         type: "timeseries", data: {
           minutes: this.history_perminutes_a,
-          averages: this.history_average_a
+          averages: this.history_average_a,
+          channel
         }
       });
     }
 
     if (channel == "/b") {
-      socket.emit("data", { type: "realtime", data: this.realtime_b });
+      socket.emit("data", { type: "realtime", data: { ...this.realtime_b, channel } });
       socket.emit("data", {
         type: "timeseries", data: {
           minutes: this.history_perminutes_b,
-          averages: this.history_average_b
+          averages: this.history_average_b,
+          channel
         }
       });
     }
@@ -100,7 +102,7 @@ class GetFirebaseRecord {
       if (snapshot.exists()) {
         this.realtime_a = snapshot.val();
         this.sockets.forEach(socket => {
-          if (socket.channel == "/a") socket.socket.emit("data", { type: "realtime", data: this.realtime_a });
+          if (socket.channel == "/a") socket.socket.emit("data", { type: "realtime", data: { ...this.realtime_a, channel: socket.channel } });
         })
       }
     })
@@ -115,7 +117,7 @@ class GetFirebaseRecord {
       if (snapshot.exists()) {
         this.realtime_b = snapshot.val();
         this.sockets.forEach(socket => {
-          if (socket.channel == "/b") socket.socket.emit("data", { type: "realtime", data: this.realtime_b });
+          if (socket.channel == "/b") socket.socket.emit("data", { type: "realtime", data: { ...this.realtime_b, channel: socket.channel } });
         })
       }
     })
@@ -154,6 +156,7 @@ class GetFirebaseRecord {
           if (socket.channel == "/a") socket.socket.emit("data", {
             type: "timeseries", data: {
               minutes: this.history_perminutes_a,
+              channel: socket.channel
             }
           });
         })
@@ -196,6 +199,7 @@ class GetFirebaseRecord {
           if (socket.channel == "/a") socket.socket.emit("data", {
             type: "timeseries", data: {
               averages: this.history_average_a,
+              channel: socket.channel
             }
           });
         })
@@ -237,6 +241,7 @@ class GetFirebaseRecord {
           if (socket.channel == "/b") socket.socket.emit("data", {
             type: "timeseries", data: {
               minutes: this.history_perminutes_b,
+              channel: socket.channel
             }
           });
         })
@@ -278,6 +283,7 @@ class GetFirebaseRecord {
           if (socket.channel == "/b") socket.socket.emit("data", {
             type: "timeseries", data: {
               averages: this.history_average_b,
+              channel: socket.channel
             }
           });
         });
