@@ -269,7 +269,7 @@ class GetFirebaseRecord {
   Sets listeners to the History Average Database Station B
   */
   setListenerHistoryAverageB = () => {
-    this.query_history_perminutes_b.limitToLast(1).on("child_added", (snapshot) => {
+    this.query_history_average_b.limitToLast(1).on("child_added", (snapshot) => {
       if (snapshot.exists()) {
         const _data = snapshot.val();
         const date_start_at_now = moment().subtract(30, "minutes");
